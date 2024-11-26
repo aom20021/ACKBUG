@@ -1,40 +1,37 @@
-//Recibir invite
-//Enviar 100 trying
-//Enviar 200 ok
-//Recibir ACK
-//Recibir BYE
-//Enviar 200 ok
-
-using System.Collections.Concurrent;
-using System.Net;
 using System.Net.Sockets;
 using SIPSorcery.SIP;
-using SIPSorcery.SIP.App;
+using Microsoft.Extensions.Logging;
+using Serilog.Extensions.Logging;
+
 class UAC
 {
-    SIPTransport transport;
+    private static Microsoft.Extensions.Logging.ILogger _logger = Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
 
-    UACInviteTransaction tx;
+    private SIPTransport _transport;
 
-    public UAC(SIPTransport transport)
-    {
-        this.transport = transport;
-    }
+    public UACInviteTransaction? InviteTransaction;
 
     public delegate Task OnResponseDelegate(SIPEndPoint localSIPEndPoint, SIPEndPoint remoteEndPoint, SIPTransaction transaction, SIPResponse sipRequest);
-    public event OnResponseDelegate onResponse;
+    public event OnResponseDelegate? onResponse;
 
-
-
-    public async Task sendMsg(SIPEndPoint localSIPEndPoint, SIPEndPoint remoteEndPoint, SIPTransaction transaction, SIPRequest sipRequest)
+    public UAC(SIPTransport transport, SerilogLoggerFactory loggerFactory)
     {
+        _transport = transport;
+        _logger = loggerFactory.CreateLogger<UAC>();
+    }
+
+    public Task RequestHandler(SIPEndPoint localSIPEndPoint, SIPEndPoint remoteEndPoint, SIPTransaction transaction, SIPRequest sipRequest)
+    {
+        _logger.LogDebug($"Received request: {sipRequest.Method}");
+        _logger.LogTrace($"{sipRequest}");
         if (sipRequest.Method == SIPMethodsEnum.INVITE)
         {
-            var newDestination = sipRequest.URI;
-            Console.WriteLine($"{newDestination}");
-            var outboundRequest = SIPRequest.GetRequest(SIPMethodsEnum.INVITE, newDestination);
-            outboundRequest.URI = newDestination;
+            _logger.LogDebug($"Setting up outbound request");
+            var outboundRequest = SIPRequest.GetRequest(SIPMethodsEnum.INVITE, sipRequest.URI);
+            outboundRequest.URI = sipRequest.URI;
             outboundRequest.BodyBuffer = sipRequest.BodyBuffer;
+
+            _logger.LogDebug($"Setting up headers");
             var finalHeaders = sipRequest.Header.Copy();
             finalHeaders.Vias = outboundRequest.Header.Vias;
             finalHeaders.From = outboundRequest.Header.From;
@@ -42,24 +39,31 @@ class UAC
             finalHeaders.Contact = new List<SIPContactHeader>() {SIPContactHeader.GetDefaultSIPContactHeader(outboundRequest.URI.Scheme)};
             finalHeaders.Routes = null;
             outboundRequest.Header = finalHeaders;
-            tx = new UACInviteTransaction(transport, outboundRequest, null, true);
-            Console.WriteLine($"Sending request to {remoteEndPoint}");
-            tx.SendInviteRequest();
-            tx.UACInviteTransactionInformationResponseReceived += async (loc, rem, tx, resp) =>
+
+            _logger.LogDebug($"Initializing transaction");
+            InviteTransaction = new UACInviteTransaction(_transport, outboundRequest, null, true);
+
+            _logger.LogDebug($"Sending INVITE request");
+            InviteTransaction.SendInviteRequest();
+
+            InviteTransaction.UACInviteTransactionInformationResponseReceived += (loc, rem, tx, resp) =>
             {
-                await onResponse.Invoke(loc, rem, tx, resp);
-                return SocketError.Success;
+                _logger.LogDebug($"Received Information response");
+                onResponse!.Invoke(loc, rem, tx, resp);
+                return Task.FromResult(SocketError.Success);
             };
-            tx.UACInviteTransactionFinalResponseReceived += async (loc, rem, tx, resp) =>
+            InviteTransaction.UACInviteTransactionFinalResponseReceived += (loc, rem, tx, resp) =>
             {
-                await onResponse.Invoke(loc, rem, tx, resp);
-                return SocketError.Success;
+                _logger.LogDebug($"Received Final response");
+                onResponse!.Invoke(loc, rem, tx, resp);
+                return Task.FromResult(SocketError.Success);
             };
         }
         else if (sipRequest.Method == SIPMethodsEnum.ACK)
         {
-            Console.WriteLine("ACK received");
-            tx.AckAnswer(tx.TransactionFinalResponse, tx.TransactionFinalResponse.Body, tx.TransactionFinalResponse.Header.ContentType);
+            _logger.LogDebug($"Sending ACK request");
+            InviteTransaction!.AckAnswer(InviteTransaction.TransactionFinalResponse, InviteTransaction.TransactionFinalResponse.Body, InviteTransaction.TransactionFinalResponse.Header.ContentType);
         }
+        return Task.CompletedTask;
     }
 }
