@@ -31,7 +31,7 @@ program.
 
 ## Examples
 
-### Output when the event is not triggered
+### Output when the event is triggered
 
 ![image](https://github.com/user-attachments/assets/82d2f430-f9b6-49e2-bdb0-650a80c976b1)
 
