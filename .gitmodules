@@ -1,0 +1,3 @@
+[submodule "lib/sipsorcery"]
+	path = lib/sipsorcery
+	url = git@github.com:alexander-zerpa/sipsorcery.git

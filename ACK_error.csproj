@@ -11,7 +11,10 @@
     <PackageReference Include="serilog" Version="4.1.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="sipsorcery" Version="8.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="lib\sipsorcery\src\SIPSorcery.csproj" />
   </ItemGroup>
 
 </Project>
