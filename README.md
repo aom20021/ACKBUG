@@ -13,7 +13,7 @@ pjsua --no-tcp --local-port 5062 --null-audio --outbound sip:192.168.2.216
 
 Being the outbound parameter of the second instance (the one that is going to call) the ip of the running program
 
-### Output when it works
+### Output when the event is not triggered
 
 ![image](https://github.com/user-attachments/assets/82d2f430-f9b6-49e2-bdb0-650a80c976b1)
 
