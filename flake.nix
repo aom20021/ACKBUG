@@ -11,9 +11,8 @@
       devShells.${system}.default = pkgs.mkShell rec {
         name = "INCONNECT";
         packages = with pkgs; [
-          docker
-          go
-          jq
+          dotnet-sdk_8
+          pjsip
         ];
         LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath packages;
       };
