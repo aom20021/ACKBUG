@@ -11,14 +11,23 @@ changes on the code or the setup of the User Agents.
 
 ### Usage
 
-For testing we used 2 instances of [pjsua](https://www.pjsip.org/pjsua.htm), initialized with the following options
+Project is run with:
+
+```bash
+dotnet run
 ```
+
+For testing we used 2 instances of [pjsua](https://www.pjsip.org/pjsua.htm),
+initialized with the following options:
+
+```bash
 pjsua --no-tcp --local-port <caller_port> --outbound sip:<b2b_ip>
 
 pjsua --no-tcp --local-port <callee_port>
 ```
 
-Being the outbound parameter of the caller instance  the ip of the running program
+Being the outbound parameter of the caller instance the ip of the running
+program.
 
 ## Examples
 
