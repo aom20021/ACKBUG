@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="lib\sipsorcery\src\SIPSorcery.csproj" />
+    <ProjectReference Include="..\lib\sipsorcery\src\SIPSorcery.csproj" />
   </ItemGroup>
 
 </Project>
