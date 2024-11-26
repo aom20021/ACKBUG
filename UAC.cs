@@ -26,7 +26,7 @@ class UAC
 
 
 
-    public async Task sendMsg(SIPEndPoint localSIPEndPoint, SIPEndPoint remoteEndPoint, SIPRequest sipRequest)
+    public async Task sendMsg(SIPEndPoint localSIPEndPoint, SIPEndPoint remoteEndPoint, SIPTransaction transaction, SIPRequest sipRequest)
     {
         if (sipRequest.Method == SIPMethodsEnum.INVITE)
         {
@@ -50,6 +50,16 @@ class UAC
                 await onResponse.Invoke(loc, rem, tx, resp);
                 return SocketError.Success;
             };
+            tx.UACInviteTransactionFinalResponseReceived += async (loc, rem, tx, resp) =>
+            {
+                await onResponse.Invoke(loc, rem, tx, resp);
+                return SocketError.Success;
+            };
+        }
+        else if (sipRequest.Method == SIPMethodsEnum.ACK)
+        {
+            Console.WriteLine("ACK received");
+            tx.AckAnswer(tx.TransactionFinalResponse, tx.TransactionFinalResponse.Body, tx.TransactionFinalResponse.Header.ContentType);
         }
     }
 }
