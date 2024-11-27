@@ -12,7 +12,10 @@ class Program
 
     public static void Main()
     {
-        SerilogLoggerFactory factory = AddConsoleLogger(LogEventLevel.Debug);
+        B2B b2B = new B2B();
+
+        Console.ReadLine();
+        /*SerilogLoggerFactory factory = AddConsoleLogger(LogEventLevel.Debug);
 
         SIPSorcery.LogFactory.Set(factory);
         _logger = factory.CreateLogger<Program>();
@@ -36,7 +39,7 @@ class Program
         uas.onRequest += uac.RequestHandler;
         uac.onResponse += uas.ResponseHandler;
 
-        Console.ReadLine();
+        Console.ReadLine();*/
     }
 
     private static SerilogLoggerFactory AddConsoleLogger(LogEventLevel logLevel = LogEventLevel.Debug)
