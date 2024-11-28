@@ -33,7 +33,7 @@ class UAC
 
             _logger.LogDebug($"Setting up headers");
             var finalHeaders = sipRequest.Header.Copy();
-            finalHeaders.CallId = CallProperties.CreateNewCallId();
+            finalHeaders.CallId = outboundRequest.Header.CallId;
             finalHeaders.Vias = outboundRequest.Header.Vias;
             finalHeaders.From = outboundRequest.Header.From;
             finalHeaders.To = outboundRequest.Header.To;
